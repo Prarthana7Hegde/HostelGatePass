@@ -1,34 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import api from "../api/axios";
 
 export default function ParentConfirm() {
-  const [searchParams] = useSearchParams();
-  const [message, setMessage] = useState("Please wait while confirmation is processed...");
+  const [params] = useSearchParams();
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const token = params.get("token");
+    const action = params.get("action");
 
-    if (!token) {
-      setMessage("Invalid confirmation link ❌");
-      return;
-    }
-
-    // Call backend parent confirmation API
-    api.get(`/passes/parent-confirm?token=${token}`)
-      .then(res => {
-        setMessage(res.data);
-      })
-      .catch(err => {
-        setMessage("Invalid or expired confirmation link ❌");
-      });
-
+    window.location.href = 
+      `http://localhost:4000/api/passes/parent-confirm?token=${token}&action=${action}`;
   }, []);
 
-  return (
-    <div style={{ padding: "40px" }}>
-      <h2>Parent Confirmation Page</h2>
-      <p>{message}</p>
-    </div>
-  );
+  return <h2>Please wait... Processing approval...</h2>;
 }

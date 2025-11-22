@@ -1,20 +1,26 @@
-const crypto = require('crypto');
+const jwt = require("jsonwebtoken");
 
-exports.signQR = (passId, expiryTs) => {
-  const payload = JSON.stringify({ passId, expiryTs });
-  const hmac = crypto.createHmac('sha256', process.env.QR_SECRET).update(payload).digest('hex');
-  const combined = `${Buffer.from(payload).toString('base64')}.${hmac}`;
-  return Buffer.from(combined).toString('base64');
+const QR_SECRET = process.env.QR_SECRET || "QR_SECRET_KEY_123";
+
+// CREATE QR TOKEN
+
+
+exports.signQR = (passId) => {
+  return jwt.sign(
+    { passId },
+    process.env.QR_SECRET,
+    { expiresIn: "3h" }   // ✅ VALID FORMAT
+  );
 };
 
+
+// VERIFY QR TOKEN
 exports.verifyQR = (token) => {
-  const decoded = Buffer.from(token, 'base64').toString('utf8');
-  const [payloadB64, hmac] = decoded.split('.');
-  const payload = Buffer.from(payloadB64, 'base64').toString('utf8');
-
-  const expected = crypto.createHmac('sha256', process.env.QR_SECRET).update(payload).digest('hex');
-
-  if (expected !== hmac) throw new Error('Invalid QR');
-
-  return JSON.parse(payload);
+  try {
+    const decoded = jwt.verify(token, QR_SECRET);
+    return decoded;
+  } catch (err) {
+    console.log("QR VERIFY ERROR:", err.message);
+    throw new Error("Invalid QR");
+  }
 };

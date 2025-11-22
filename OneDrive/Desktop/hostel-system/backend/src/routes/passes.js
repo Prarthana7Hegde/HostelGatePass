@@ -1,17 +1,32 @@
+const router = require("express").Router();
+const auth = require("../middleware/auth");
 
-const router = require('express').Router();
-const auth = require('../middleware/auth');
-const passController = require('../controllers/passController');  // ✅ FIXED IMPORT
+const {
+  createPass,
+  scanQR,
+  wardenAction,
+  getStudentPasses,
+  parentConfirm,
+  getPending,
+  getQRImage
+} = require("../controllers/passController");
 
-// Routes
-router.post('/', auth, passController.createPass);
-router.get('/student', auth, passController.getStudentPasses);
-router.get('/parent-confirm', passController.parentConfirm);
-router.post('/warden/:id', auth, passController.wardenAction);
-router.post('/scan', auth, passController.scanQR);
+// Create pass
+router.post("/", auth, createPass);
+
+// Student routes
+router.get("/student", auth, getStudentPasses);
+router.get("/qr/:id", auth, getQRImage);
 
 
-// NEW: pending passes for warden
-router.get('/pending', auth, passController.getPending);  // ✅ FIXED (authenticate → auth)
+// Parent confirmation
+router.get("/parent-confirm", parentConfirm);
+
+// Warden routes
+router.get("/pending", auth, getPending);
+router.post("/warden/:id", auth, wardenAction);
+
+// QR Scan
+router.post("/scan", scanQR);
 
 module.exports = router;
